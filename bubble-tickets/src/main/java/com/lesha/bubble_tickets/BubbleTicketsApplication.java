@@ -7,7 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class BubbleTicketsApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BubbleTicketsApplication.class, args);
+
+        SpringApplication.run(BubbleTicketsApplication.class, args);
 	}
 
 }
