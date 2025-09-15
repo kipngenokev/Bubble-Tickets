@@ -57,6 +57,9 @@ public class Event {
     @ManyToMany(mappedBy = "staffingEvents")
     private List<User> staff = new ArrayList<>();
 
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+    private List<TicketType> ticketTypes = new ArrayList<>();
+
     @CreatedDate
     @Column(name = "created-at", updatable = false, nullable = false)
     private LocalDateTime createdAt;
