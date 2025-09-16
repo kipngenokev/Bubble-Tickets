@@ -15,5 +15,5 @@ public interface EventMapper {
     CreateTicketTypeRequest fromDto(CreateTicketTypeRequestDto dto);
     CreateEventRequest fromDto(CreateEventRequestDto dto);
 
-    CreateEventResponseDto tDto(Event event);
+    CreateEventResponseDto toDto(Event event);
 }
