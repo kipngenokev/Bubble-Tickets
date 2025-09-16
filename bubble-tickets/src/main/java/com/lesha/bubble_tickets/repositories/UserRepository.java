@@ -1,6 +1,6 @@
 package com.lesha.bubble_tickets.repositories;
 
-import com.lesha.bubble_tickets.domain.User;
+import com.lesha.bubble_tickets.domain.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

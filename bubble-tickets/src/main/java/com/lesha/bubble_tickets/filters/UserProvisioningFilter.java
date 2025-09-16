@@ -1,6 +1,6 @@
 package com.lesha.bubble_tickets.filters;
 
-import com.lesha.bubble_tickets.domain.User;
+import com.lesha.bubble_tickets.domain.entities.User;
 import com.lesha.bubble_tickets.repositories.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

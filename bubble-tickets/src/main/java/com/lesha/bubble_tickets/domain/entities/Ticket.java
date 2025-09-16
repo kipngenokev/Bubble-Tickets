@@ -1,4 +1,4 @@
-package com.lesha.bubble_tickets.domain;
+package com.lesha.bubble_tickets.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
