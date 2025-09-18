@@ -21,9 +21,10 @@ import java.util.UUID;
 public class User {
     @Id
     @Column(name = "id",updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "false" , nullable = false)
+    @Column(name = "name" , nullable = false)
     private String name;
 
     @Column(name = "email", nullable = false)
