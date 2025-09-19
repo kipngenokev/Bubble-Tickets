@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
         String errorMessage = fieldErrors.stream()
                 .findFirst()
                 .map(fieldError -> fieldError.getField() + ": "+ fieldError.getDefaultMessage())
-                .orElse("ValidationError occurred");
+                .orElse("Validation error occurred");
         errorDto.setError(errorMessage);
         return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
     }
