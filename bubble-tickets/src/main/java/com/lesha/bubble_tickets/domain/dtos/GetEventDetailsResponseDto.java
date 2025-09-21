@@ -22,7 +22,7 @@ public class GetEventDetailsResponseDto {
     private LocalDateTime salesStart;
     private LocalDateTime salesEnd;
     private EventStatusEnum status;
-    private List<GetEventTicketTypeResponseDto> ticketTypes = new ArrayList<>();
+    private List<GetEventDetailsTicketTypeResponseDto> ticketTypes = new ArrayList<>();
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

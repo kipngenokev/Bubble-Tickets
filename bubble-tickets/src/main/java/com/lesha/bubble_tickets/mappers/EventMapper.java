@@ -19,4 +19,10 @@ public interface EventMapper {
     ListEventTicketTypeResponseDto toDto(TicketType ticketType);
 
     ListEventResponseDto toListEventResponseDto(Event event);
+
+    GetEventDetailsTicketTypeResponseDto toGetEventDetailsTicketTypeResponseDto(TicketType ticketTpe);
+
+    GetEventDetailsResponseDto toGetEventDetailsResponseDto(Event event);
+
+
 }
