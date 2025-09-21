@@ -2,10 +2,9 @@ package com.lesha.bubble_tickets.mappers;
 
 import com.lesha.bubble_tickets.domain.CreateEventRequest;
 import com.lesha.bubble_tickets.domain.CreateTicketTypeRequest;
-import com.lesha.bubble_tickets.domain.dtos.CreateEventRequestDto;
-import com.lesha.bubble_tickets.domain.dtos.CreateEventResponseDto;
-import com.lesha.bubble_tickets.domain.dtos.CreateTicketTypeRequestDto;
+import com.lesha.bubble_tickets.domain.dtos.*;
 import com.lesha.bubble_tickets.domain.entities.Event;
+import com.lesha.bubble_tickets.domain.entities.TicketType;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
@@ -16,4 +15,8 @@ public interface EventMapper {
     CreateEventRequest fromDto(CreateEventRequestDto dto);
 
     CreateEventResponseDto toDto(Event event);
+
+    ListEventTicketTypeResponseDto toDto(TicketType ticketType);
+
+    ListEventResponseDto toListEventResponseDto(Event event);
 }
