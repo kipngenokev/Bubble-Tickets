@@ -2,6 +2,8 @@ package com.lesha.bubble_tickets.mappers;
 
 import com.lesha.bubble_tickets.domain.CreateEventRequest;
 import com.lesha.bubble_tickets.domain.CreateTicketTypeRequest;
+import com.lesha.bubble_tickets.domain.UpdateEventRequest;
+import com.lesha.bubble_tickets.domain.UpdateTicketTypeRequest;
 import com.lesha.bubble_tickets.domain.dtos.*;
 import com.lesha.bubble_tickets.domain.entities.Event;
 import com.lesha.bubble_tickets.domain.entities.TicketType;
@@ -24,9 +26,9 @@ public interface EventMapper {
 
     GetEventDetailsResponseDto toGetEventDetailsResponseDto(Event event);
 
-    UpdateTicketTypeRequestDto fromDto(UpdateTicketTypeRequestDto dto);
+    UpdateTicketTypeRequest fromDto(UpdateTicketTypeRequestDto dto);
 
-    UpdateEventRequestDto fromDto(UpdateEventRequestDto dto);
+    UpdateEventRequest fromDto(UpdateEventRequestDto dto);
 
     UpdateTicketTypeResponseDto toUpdateTicketTypeResponseDto(TicketType ticketType);
 

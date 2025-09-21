@@ -1,10 +1,7 @@
 package com.lesha.bubble_tickets.controllers;
-
 import com.lesha.bubble_tickets.domain.CreateEventRequest;
-import com.lesha.bubble_tickets.domain.dtos.CreateEventRequestDto;
-import com.lesha.bubble_tickets.domain.dtos.CreateEventResponseDto;
-import com.lesha.bubble_tickets.domain.dtos.GetEventDetailsResponseDto;
-import com.lesha.bubble_tickets.domain.dtos.ListEventResponseDto;
+import com.lesha.bubble_tickets.domain.UpdateEventRequest;
+import com.lesha.bubble_tickets.domain.dtos.*;
 import com.lesha.bubble_tickets.domain.entities.Event;
 import com.lesha.bubble_tickets.mappers.EventMapper;
 import com.lesha.bubble_tickets.services.EventService;
@@ -50,6 +47,20 @@ public class EventController {
         return ResponseEntity.ok(
                 events.map(eventMapper::toListEventResponseDto)
         );
+    }
+
+    @PutMapping(path = "/{eventId}")
+    public ResponseEntity<UpdateEventResponseDto> updateEvent(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID eventId,
+            @Valid @RequestBody  UpdateEventRequestDto updateEventRequestDto) {
+        UpdateEventRequest updateEventRequest = eventMapper.fromDto(updateEventRequestDto);
+        UUID userId = parseUserId(jwt);
+
+        Event updatedEvent = eventService.updateEventForOrganizer(userId,eventId,updateEventRequest);
+        UpdateEventResponseDto updateEventResponseDto = eventMapper.toUpdateEventResponseDto(updatedEvent);
+
+        return ResponseEntity.ok(updateEventResponseDto);
     }
 
     @GetMapping(path = "/{eventId}")
