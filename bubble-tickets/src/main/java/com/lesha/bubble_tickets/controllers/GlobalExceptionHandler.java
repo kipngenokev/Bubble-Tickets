@@ -2,10 +2,7 @@ package com.lesha.bubble_tickets.controllers;
 
 import com.lesha.bubble_tickets.domain.dtos.ErrorDto;
 import com.lesha.bubble_tickets.domain.entities.TicketType;
-import com.lesha.bubble_tickets.exceptions.EventNotFoundException;
-import com.lesha.bubble_tickets.exceptions.EventUpdateException;
-import com.lesha.bubble_tickets.exceptions.TicketTypeNotFoundException;
-import com.lesha.bubble_tickets.exceptions.UserNotFoundException;
+import com.lesha.bubble_tickets.exceptions.*;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,6 +19,15 @@ import java.util.List;
 @Slf4j
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(QrCodeGenerationException.class)
+    public ResponseEntity<ErrorDto> handleQrCodeGenerationExceptionException (
+            QrCodeGenerationException ex
+    ) {
+        log.error("Caught QrCodeGenerationException", ex);
+        ErrorDto errorDto = new ErrorDto();
+        errorDto.setError("Unable to generate a Qr Code");
+        return new ResponseEntity<>(errorDto, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
     @ExceptionHandler(EventUpdateException.class)
     public ResponseEntity<ErrorDto> handleEventUpdateException (
             EventUpdateException ex
