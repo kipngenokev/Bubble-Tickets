@@ -49,19 +49,19 @@ public class EventController {
         );
     }
 
-    @PutMapping(path = "/{eventId}")
-    public ResponseEntity<UpdateEventResponseDto> updateEvent(
-            @AuthenticationPrincipal Jwt jwt,
-            @PathVariable UUID eventId,
-            @Valid @RequestBody  UpdateEventRequestDto updateEventRequestDto) {
-        UpdateEventRequest updateEventRequest = eventMapper.fromDto(updateEventRequestDto);
-        UUID userId = parseUserId(jwt);
-
-        Event updatedEvent = eventService.updateEventForOrganizer(userId,eventId,updateEventRequest);
-        UpdateEventResponseDto updateEventResponseDto = eventMapper.toUpdateEventResponseDto(updatedEvent);
-
-        return ResponseEntity.ok(updateEventResponseDto);
-    }
+//    @PutMapping(path = "/{eventId}")
+//    public ResponseEntity<UpdateEventResponseDto> updateEvent(
+//            @AuthenticationPrincipal Jwt jwt,
+//            @PathVariable UUID eventId,
+//            @Valid @RequestBody  UpdateEventRequestDto updateEventRequestDto) {
+//        UpdateEventRequest updateEventRequest = eventMapper.fromDto(updateEventRequestDto);
+//        UUID userId = parseUserId(jwt);
+//
+//        Event updatedEvent = eventService.updateEventForOrganizer(userId,eventId,updateEventRequest);
+//        UpdateEventResponseDto updateEventResponseDto = eventMapper.toUpdateEventResponseDto(updatedEvent);
+//
+//        return ResponseEntity.ok(updateEventResponseDto);
+//    }
 
     @GetMapping(path = "/{eventId}")
     public ResponseEntity<GetEventDetailsResponseDto>  getEvent(
