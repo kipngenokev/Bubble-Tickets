@@ -31,7 +31,7 @@ public class QrCodeServiceImpl implements QrCodeService {
 
     private final QRCodeWriter qrCodeWriter;
 
-    private QrCodeRepository qrCodeRepository;
+    private final QrCodeRepository qrCodeRepository;
 
     @Override
     public QrCode generateQrCode(Ticket ticket) {
