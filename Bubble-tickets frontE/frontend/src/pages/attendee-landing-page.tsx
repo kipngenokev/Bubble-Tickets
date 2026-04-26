@@ -48,6 +48,7 @@ const AttendeeLandingPage: React.FC = () => {
   const queryPublishedEvents = async () => {
     if (!query) {
       await refreshPublishedEvents();
+      return;
     }
 
     try {
@@ -113,16 +114,23 @@ const AttendeeLandingPage: React.FC = () => {
             <h1 className="text-2xl font-bold mb-4">
               Find Tickets to Your Next Event
             </h1>
-            <div className="flex gap-2 max-w-lg">
+            <form
+              className="flex gap-2 max-w-lg"
+              onSubmit={(e) => {
+                e.preventDefault();
+                queryPublishedEvents();
+              }}
+            >
               <Input
                 className="bg-white text-black"
-                value={query}
+                value={query ?? ""}
                 onChange={(e) => setQuery(e.target.value)}
+                aria-label="Search events"
               />
-              <Button onClick={queryPublishedEvents}>
+              <Button type="submit" aria-label="Search">
                 <Search />
               </Button>
-            </div>
+            </form>
           </div>
         </div>
       </div>

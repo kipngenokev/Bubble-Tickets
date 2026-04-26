@@ -13,8 +13,8 @@ const PublishedEventCard: React.FC<PublishedEventCardProperties> = ({
   publishedEvent,
 }) => {
   return (
-    <Link to={`/events/${publishedEvent.id}`}>
-      <Card className="py-0 overflow-hidden max-w-[240px] gap-2">
+    <Card className="py-0 overflow-hidden max-w-[240px] gap-2">
+      <Link to={`/events/${publishedEvent.id}`} className="block">
         {/* Card Image */}
         <div className="h-[140px]">
           <RandomEventImage />
@@ -40,17 +40,25 @@ const PublishedEventCard: React.FC<PublishedEventCardProperties> = ({
               </div>
             )}
           </div>
-          <div className="flex justify-between p-2 border-t text-gray-500">
-            <button className="cursor-pointer">
-              <Heart />
-            </button>
-            <button className="cursor-pointer">
-              <Share2 />
-            </button>
-          </div>
         </div>
-      </Card>
-    </Link>
+      </Link>
+      <div className="flex justify-between p-2 border-t text-gray-500 mx-2">
+        <button
+          type="button"
+          aria-label="Save to favorites"
+          className="cursor-pointer"
+        >
+          <Heart />
+        </button>
+        <button
+          type="button"
+          aria-label="Share event"
+          className="cursor-pointer"
+        >
+          <Share2 />
+        </button>
+      </div>
+    </Card>
   );
 };
 
