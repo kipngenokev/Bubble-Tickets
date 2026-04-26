@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -31,25 +32,40 @@ public class TicketValidationServiceImpl implements TicketValidationService {
 
         Ticket ticket = qrCode.getTicket();
 
-        return validateTicket(ticket);
+        return validateTicket(ticket, TicketValidationMethodEnum.QR_SCAN);
     }
 
-    private TicketValidation validateTicket(Ticket ticket) {
+    private TicketValidation validateTicket(Ticket ticket, TicketValidationMethodEnum method) {
         TicketValidation ticketValidation = new TicketValidation();
         ticketValidation.setTicket(ticket);
-        //sets the validation method to QR_SCAN, even when called from validateTicketManually
-        //passing the method type as a parameter to reflect the actual validation method
-        ticketValidation.setValidationMethod(TicketValidationMethodEnum.QR_SCAN);
+        ticketValidation.setValidationMethod(method);
 
-        TicketValidationStatusEnum ticketValidationStatus = ticket.getValidations().stream()
-                .filter(v -> TicketValidationStatusEnum.VALID.equals(
-                        v.getStatus())).findFirst()
-                .map( v -> TicketValidationStatusEnum.INVALID)
-                .orElse(TicketValidationStatusEnum.VALID);
-
-        ticketValidation.setStatus(ticketValidationStatus);
+        ticketValidation.setStatus(resolveValidationStatus(ticket));
 
         return ticketValidationRepository.save(ticketValidation);
+    }
+
+    private TicketValidationStatusEnum resolveValidationStatus(Ticket ticket) {
+        if (ticket.getStatus() != TicketStatusEnum.PURCHASED) {
+            return TicketValidationStatusEnum.INVALID;
+        }
+
+        Event event = ticket.getTicketType().getEvent();
+        if (event.getStatus() == EventStatusEnum.CANCELLED) {
+            return TicketValidationStatusEnum.INVALID;
+        }
+        if (event.getStatus() == EventStatusEnum.COMPLETED
+                || (event.getEnd() != null && LocalDateTime.now().isAfter(event.getEnd()))) {
+            return TicketValidationStatusEnum.EXPIRED;
+        }
+
+        boolean alreadyValidated = ticket.getValidations().stream()
+                .anyMatch(v -> TicketValidationStatusEnum.VALID.equals(v.getStatus()));
+        if (alreadyValidated) {
+            return TicketValidationStatusEnum.INVALID;
+        }
+
+        return TicketValidationStatusEnum.VALID;
     }
 
     @Override
@@ -57,6 +73,6 @@ public class TicketValidationServiceImpl implements TicketValidationService {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(TicketNotFoundException::new);
 
-        return validateTicket(ticket);
+        return validateTicket(ticket, TicketValidationMethodEnum.MANUAL);
     }
 }
