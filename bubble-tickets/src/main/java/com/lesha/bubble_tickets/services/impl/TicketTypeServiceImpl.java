@@ -56,6 +56,6 @@ public class TicketTypeServiceImpl implements TicketTypeService {
         Ticket savedTicket = ticketRepository.save(ticket);
         qrCodeService.generateQrCode(savedTicket);
 
-        return ticketRepository.save(savedTicket);
+        return savedTicket;
     }
 }
