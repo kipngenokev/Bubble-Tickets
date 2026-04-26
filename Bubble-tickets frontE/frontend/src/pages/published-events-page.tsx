@@ -1,3 +1,5 @@
+import LoadingState from "@/components/loading-state";
+import PublicNavBar from "@/components/public-nav-bar";
 import RandomEventImage from "@/components/random-event-image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -7,15 +9,14 @@ import {
   PublishedEventTicketTypeDetails,
 } from "@/domain/domain";
 import { getPublishedEvent } from "@/lib/api";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { AlertCircle, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "react-oidc-context";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useParams } from "react-router";
 
 const PublishedEventsPage: React.FC = () => {
-  const { isAuthenticated, isLoading, signinRedirect, signoutRedirect } =
-    useAuth();
-  const navigate = useNavigate();
+  const { isLoading } = useAuth();
   const { id } = useParams();
   const [error, setError] = useState<string | undefined>();
   const [publishedEvent, setPublishedEvent] = useState<
@@ -42,13 +43,7 @@ const PublishedEventsPage: React.FC = () => {
         }
       } catch (err) {
         if (ignore) return;
-        if (err instanceof Error) {
-          setError(err.message);
-        } else if (typeof err === "string") {
-          setError(err);
-        } else {
-          setError("An unknown error has occurred");
-        }
+        setError(getErrorMessage(err));
       }
     };
     doUseEffect();
@@ -69,69 +64,57 @@ const PublishedEventsPage: React.FC = () => {
     );
   }
 
-  if (isLoading) {
-    return <p>Loading...</p>;
+  if (isLoading || !publishedEvent) {
+    return (
+      <div className="bg-black min-h-screen text-white">
+        <PublicNavBar />
+        <LoadingState label="Loading event…" />
+      </div>
+    );
   }
 
   return (
     <div className="bg-black min-h-screen text-white">
-      {/* Nav */}
-      <div className="flex justify-end p-4 container mx-auto">
-        {isAuthenticated ? (
-          <div className="flex gap-4">
-            <Button
-              onClick={() => navigate("/dashboard/events")}
-              className="cursor-pointer"
-            >
-              Dashboard
-            </Button>
-            <Button
-              className="cursor-pointer"
-              onClick={() => signoutRedirect()}
-            >
-              Log out
-            </Button>
-          </div>
-        ) : (
-          <div className="flex gap-4">
-            <Button className="cursor-pointer" onClick={() => signinRedirect()}>
-              Log in
-            </Button>
-          </div>
-        )}
-      </div>
+      <PublicNavBar />
 
-      <main className="container mx-auto px-4 py-16">
+      <main className="container mx-auto px-4 py-8 md:py-16">
         {/* Header */}
-        <div className="grid grid-cols-2 gap-8 max-w-5xl mx-auto mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-8">
           {/* Left Column */}
-          <div className="space-y-4">
-            <h1 className="text-3xl font-bold">{publishedEvent?.name}</h1>
+          <div className="space-y-4 order-2 md:order-1">
+            <h1 className="text-3xl font-bold">{publishedEvent.name}</h1>
             <p className="text-lg flex gap-2 text-gray-300">
-              <MapPin />
-              {publishedEvent?.venue}
+              <MapPin aria-hidden="true" />
+              {publishedEvent.venue}
             </p>
           </div>
           {/* Right Column */}
-          <div className="bg-gray-600 rounded-lg w-full max-w-sm overflow-hidden">
-            <RandomEventImage />
+          <div className="bg-gray-600 rounded-lg w-full max-w-sm mx-auto md:mx-0 overflow-hidden order-1 md:order-2 aspect-video">
+            <RandomEventImage
+              seed={publishedEvent.id}
+              alt={publishedEvent.name}
+            />
           </div>
         </div>
 
         <h2 className="text-2xl font-bold mb-6">Available Tickets</h2>
-        <div className="flex gap-2">
+        <div className="flex flex-col md:flex-row gap-4">
           {/* Left */}
-          <div className="w-1/2">
-            {publishedEvent?.ticketTypes?.map((ticketType) => (
+          <div className="w-full md:w-1/2">
+            {publishedEvent.ticketTypes?.map((ticketType) => (
               <Card
-                className="bg-gray-800 border-gray-600 hover:bg-gray-700 text-white cursor-pointer gap-0 mb-2"
+                className={`bg-gray-800 border text-white cursor-pointer gap-0 mb-2 ${
+                  selectedTicketType?.id === ticketType.id
+                    ? "border-purple-500"
+                    : "border-gray-600 hover:bg-gray-700"
+                }`}
                 key={ticketType.id}
                 onClick={() => setSelectedTicketType(ticketType)}
               >
                 <CardHeader>
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold">{ticketType.name}</h3>
-                    <span className="text-xl font-bold ">
+                    <span className="text-xl font-bold">
                       ${ticketType.price}
                     </span>
                   </div>
@@ -146,12 +129,12 @@ const PublishedEventsPage: React.FC = () => {
           </div>
 
           {/* Right */}
-          <div className="w-1/2 text-white">
-            <div className="bg-gray-800 rounded-lg p-6 border border-gray-600">
+          <div className="w-full md:w-1/2 text-white">
+            <div className="bg-gray-800 rounded-lg p-6 border border-gray-600 sticky top-4">
               <h2 className="text-2xl font-bold">{selectedTicketType?.name}</h2>
               <div className="mb-6">
                 <span className="text-3xl font-bold">
-                  ${selectedTicketType?.price}
+                  ${selectedTicketType?.price ?? 0}
                 </span>
               </div>
               <div className="mb-6">
@@ -160,7 +143,7 @@ const PublishedEventsPage: React.FC = () => {
                 </p>
               </div>
               <Link
-                to={`/events/${publishedEvent?.id}/purchase/${selectedTicketType?.id}`}
+                to={`/events/${publishedEvent.id}/purchase/${selectedTicketType?.id}`}
               >
                 <Button className="w-full bg-purple-600 hover:bg-purple-700 cursor-pointer">
                   Purchase Ticket

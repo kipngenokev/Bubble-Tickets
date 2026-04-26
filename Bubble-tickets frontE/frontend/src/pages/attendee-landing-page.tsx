@@ -1,20 +1,20 @@
 import { useAuth } from "react-oidc-context";
 import { Button } from "../components/ui/button";
-import { useNavigate } from "react-router";
 import { Input } from "@/components/ui/input";
-import { AlertCircle, Search } from "lucide-react";
+import { AlertCircle, CalendarOff, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PublishedEventSummary, SpringBootPagination } from "@/domain/domain";
 import { listPublishedEvents, searchPublishedEvents } from "@/lib/api";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import PublishedEventCard from "@/components/published-event-card";
 import { SimplePagination } from "@/components/simple-pagination";
+import PublicNavBar from "@/components/public-nav-bar";
+import EmptyState from "@/components/empty-state";
+import LoadingState from "@/components/loading-state";
 
 const AttendeeLandingPage: React.FC = () => {
-  const { isAuthenticated, isLoading, signinRedirect, signoutRedirect } =
-    useAuth();
-
-  const navigate = useNavigate();
+  const { isLoading } = useAuth();
 
   const [page, setPage] = useState(0);
   const [publishedEvents, setPublishedEvents] = useState<
@@ -34,9 +34,7 @@ const AttendeeLandingPage: React.FC = () => {
         if (!ignore) setPublishedEvents(data);
       } catch (err) {
         if (ignore) return;
-        if (err instanceof Error) setError(err.message);
-        else if (typeof err === "string") setError(err);
-        else setError("An unknown error has occurred");
+        setError(getErrorMessage(err));
       }
     };
     run();
@@ -45,36 +43,15 @@ const AttendeeLandingPage: React.FC = () => {
     };
   }, [page]);
 
-  const refreshPublishedEvents = async () => {
-    try {
-      setPublishedEvents(await listPublishedEvents(page));
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else if (typeof err === "string") {
-        setError(err);
-      } else {
-        setError("An unknown error has occurred");
-      }
-    }
-  };
-
   const queryPublishedEvents = async () => {
-    if (!query) {
-      await refreshPublishedEvents();
-      return;
-    }
-
     try {
-      setPublishedEvents(await searchPublishedEvents(query, page));
+      const data =
+        query && query.length > 0
+          ? await searchPublishedEvents(query, page)
+          : await listPublishedEvents(page);
+      setPublishedEvents(data);
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else if (typeof err === "string") {
-        setError(err);
-      } else {
-        setError("An unknown error has occurred");
-      }
+      setError(getErrorMessage(err));
     }
   };
 
@@ -91,40 +68,16 @@ const AttendeeLandingPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <LoadingState />;
   }
 
   return (
     <div className="bg-black min-h-screen text-white">
-      {/* Nav */}
-      <div className="flex justify-end p-4 container mx-auto">
-        {isAuthenticated ? (
-          <div className="flex gap-4">
-            <Button
-              onClick={() => navigate("/dashboard")}
-              className="cursor-pointer"
-            >
-              Dashboard
-            </Button>
-            <Button
-              className="cursor-pointer"
-              onClick={() => signoutRedirect()}
-            >
-              Log out
-            </Button>
-          </div>
-        ) : (
-          <div className="flex gap-4">
-            <Button className="cursor-pointer" onClick={() => signinRedirect()}>
-              Log in
-            </Button>
-          </div>
-        )}
-      </div>
+      <PublicNavBar />
       {/* Hero */}
       <div className="container mx-auto px-4 mb-8">
         <div className="bg-[url(/organizers-landing-hero.png)] bg-cover min-h-[200px] rounded-lg bg-bottom md:min-h-[250px]">
-          <div className="bg-black/45 min-h-[200px] md:min-h-[250px] p-15 md:p-20">
+          <div className="bg-black/45 min-h-[200px] md:min-h-[250px] p-8 md:p-20">
             <h1 className="text-2xl font-bold mb-4">
               Find Tickets to Your Next Event
             </h1>
@@ -140,6 +93,7 @@ const AttendeeLandingPage: React.FC = () => {
                 value={query ?? ""}
                 onChange={(e) => setQuery(e.target.value)}
                 aria-label="Search events"
+                placeholder="Search by name or venue"
               />
               <Button type="submit" aria-label="Search">
                 <Search />
@@ -150,21 +104,39 @@ const AttendeeLandingPage: React.FC = () => {
       </div>
 
       {/* Published Event Cards */}
-      <div className="grid grid-cols-2 gap-4 px-4 md:grid-cols-4">
-        {publishedEvents?.content?.map((publishedEvent) => (
-          <PublishedEventCard
-            publishedEvent={publishedEvent}
-            key={publishedEvent.id}
-          />
-        ))}
-      </div>
+      {publishedEvents && publishedEvents.content.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4 md:grid-cols-3 lg:grid-cols-4 justify-items-center">
+          {publishedEvents.content.map((publishedEvent) => (
+            <PublishedEventCard
+              publishedEvent={publishedEvent}
+              key={publishedEvent.id}
+            />
+          ))}
+        </div>
+      ) : publishedEvents ? (
+        <EmptyState
+          icon={<CalendarOff className="h-10 w-10" />}
+          title={
+            query && query.length > 0
+              ? `No events match "${query}"`
+              : "No events are published yet"
+          }
+          description={
+            query && query.length > 0
+              ? "Try a different search term."
+              : "Check back soon — new events are added regularly."
+          }
+        />
+      ) : (
+        <LoadingState label="Loading events…" />
+      )}
 
-      {publishedEvents && (
+      {publishedEvents && publishedEvents.totalPages > 1 && (
         <div className="w-full flex justify-center py-8">
           <SimplePagination
             pagination={publishedEvents}
             onPageChange={setPage}
-          />{" "}
+          />
         </div>
       )}
     </div>

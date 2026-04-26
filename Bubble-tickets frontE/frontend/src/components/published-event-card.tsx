@@ -17,7 +17,7 @@ const PublishedEventCard: React.FC<PublishedEventCardProperties> = ({
       <Link to={`/events/${publishedEvent.id}`} className="block">
         {/* Card Image */}
         <div className="h-[140px]">
-          <RandomEventImage />
+          <RandomEventImage seed={publishedEvent.id} alt={publishedEvent.name} />
         </div>
         <div className="px-2">
           <h3 className="text-lg font-medium">{publishedEvent.name}</h3>

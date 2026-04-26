@@ -9,6 +9,7 @@ import {
 import { AlertCircle, Check, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { validateTicket } from "@/lib/api";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { useAuth } from "react-oidc-context";
 
 const DashboardValidateQrPage: React.FC = () => {
@@ -28,13 +29,7 @@ const DashboardValidateQrPage: React.FC = () => {
   };
 
   const handleError = (err: unknown) => {
-    if (err instanceof Error) {
-      setError(err.message);
-    } else if (typeof err === "string") {
-      setError(err);
-    } else {
-      setError("An unknown error occurred");
-    }
+    setError(getErrorMessage(err));
   };
 
   const handleValidate = async (id: string, method: TicketValidationMethod) => {

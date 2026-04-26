@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { purchaseTicket } from "@/lib/api";
-import { CheckCircle, CreditCard } from "lucide-react";
+import { getErrorMessage } from "@/lib/get-error-message";
+import { AlertTriangle, CheckCircle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "react-oidc-context";
 import { useNavigate, useParams } from "react-router";
@@ -12,52 +11,58 @@ const PurchaseTicketPage: React.FC = () => {
   const { isLoading, user } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | undefined>();
-  const [isPurchaseSuccess, setIsPurchaseASuccess] = useState(false);
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [isPurchaseSuccess, setIsPurchaseSuccess] = useState(false);
 
   useEffect(() => {
     if (!isPurchaseSuccess) {
       return;
     }
     const timer = setTimeout(() => {
-      navigate("/");
-    }, 3000);
+      navigate("/dashboard/tickets");
+    }, 2500);
 
     return () => clearTimeout(timer);
-  }, [isPurchaseSuccess]);
+  }, [isPurchaseSuccess, navigate]);
 
   const handlePurchase = async () => {
-    if (isLoading || !user?.access_token || !eventId || !ticketTypeId) {
+    if (
+      isLoading ||
+      isPurchasing ||
+      !user?.access_token ||
+      !eventId ||
+      !ticketTypeId
+    ) {
       return;
     }
+    setError(undefined);
+    setIsPurchasing(true);
     try {
       await purchaseTicket(user.access_token, eventId, ticketTypeId);
-      setIsPurchaseASuccess(true);
+      setIsPurchaseSuccess(true);
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else if (typeof err === "string") {
-        setError(err);
-      } else {
-        setError("An unknown error occurred");
-      }
+      setError(getErrorMessage(err));
+    } finally {
+      setIsPurchasing(false);
     }
   };
 
   if (isPurchaseSuccess) {
     return (
-      <div className="bg-black min-h-screen text-white flex items-center">
-        <div className="max-w-md mx-auto p-8 text-center">
-          <div className="bg-white p-8 rounded-lg border border-gray-200 shadow-sm text-black">
-            <div className="space-y-2">
-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
-              <h2 className="text-2xl font-bold text-green-600">Thank you!</h2>
-              <p className="text-gray-600">
-                Your ticket purchase was successful.
-              </p>
-              <p className="text-gray-600 text-sm">
-                Redirecting to home page in a few seconds...
-              </p>
-            </div>
+      <div className="bg-black min-h-screen text-white flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center">
+          <div className="bg-white p-8 rounded-lg border border-gray-200 shadow-sm text-black space-y-2">
+            <CheckCircle
+              className="h-16 w-16 text-green-500 mx-auto"
+              aria-hidden="true"
+            />
+            <h2 className="text-2xl font-bold text-green-600">Thank you!</h2>
+            <p className="text-gray-600">
+              Your ticket purchase was successful.
+            </p>
+            <p className="text-gray-600 text-sm">
+              Redirecting to your tickets…
+            </p>
           </div>
         </div>
       </div>
@@ -65,55 +70,68 @@ const PurchaseTicketPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-black min-h-screen text-white">
-      <div className="max-w-md mx-auto py-20">
-        <div className="bg-white border-gray-300 shadow-sm border rounded-lg space-y-4 p-6">
+    <div className="bg-black min-h-screen text-white px-4">
+      <div className="max-w-md mx-auto py-12 md:py-20">
+        <div className="bg-white border-gray-300 shadow-sm border rounded-lg p-6 space-y-4 text-black">
+          <div>
+            <h1 className="text-xl font-bold">Confirm your purchase</h1>
+            <p className="text-sm text-gray-600">
+              Click confirm to reserve your ticket.
+            </p>
+          </div>
+
+          <div
+            role="note"
+            className="flex items-start gap-2 border border-amber-300 bg-amber-50 rounded-md p-3 text-amber-900 text-sm"
+          >
+            <AlertTriangle
+              className="h-4 w-4 mt-0.5 flex-shrink-0"
+              aria-hidden="true"
+            />
+            <span>
+              This is a mock checkout — no payment is processed and no card
+              details are collected.
+            </span>
+          </div>
+
           {error && (
-            <div className="border border-red-200 rounded-lg p-4 bg-red-50">
-              <div className="text-red-500 text-sm">
-                <strong>Error:</strong> {error}
-              </div>
+            <div
+              role="alert"
+              className="border border-red-200 rounded-lg p-4 bg-red-50 text-red-700 text-sm"
+            >
+              <strong>Error: </strong>
+              {error}
             </div>
           )}
 
-          {/* Credit Card Number */}
-          <div className="space-y-2">
-            <Label className="text-gray-600">Credit Card Number</Label>
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="1234 5678 9012 3456"
-                maxLength={19}
-                className="bg-gray-200 text-black pl-10"
-              />
-              <CreditCard className="absolute h-4 w-4 text-gray-400 top-2.5 left-3" />
-            </div>
-          </div>
+          <Button
+            className="w-full bg-purple-600 hover:bg-purple-800 cursor-pointer"
+            onClick={handlePurchase}
+            disabled={isPurchasing}
+            aria-busy={isPurchasing}
+          >
+            {isPurchasing ? (
+              <>
+                <Loader2
+                  className="h-4 w-4 animate-spin mr-2"
+                  aria-hidden="true"
+                />
+                Purchasing…
+              </>
+            ) : (
+              "Confirm Purchase"
+            )}
+          </Button>
 
-          <div className="space-y-2">
-            <Label className="text-gray-600">Cardholder Name </Label>
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="John Smith"
-                className="bg-gray-200 text-black pl-10"
-              />
-              <CreditCard className="absolute h-4 w-4 text-gray-400 top-2.5 left-3" />
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <Button
-              className="bg-purple-500 hover:bg-purple-800 cursor-pointer"
-              onClick={handlePurchase}
-            >
-              Purchase Ticket
-            </Button>
-          </div>
-
-          <div className="text-gray-500 text-xs flex items-center justify-center">
-            This is a mock page, no payment details should be entered.
-          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full text-gray-600"
+            onClick={() => navigate(-1)}
+            disabled={isPurchasing}
+          >
+            Cancel
+          </Button>
         </div>
       </div>
     </div>

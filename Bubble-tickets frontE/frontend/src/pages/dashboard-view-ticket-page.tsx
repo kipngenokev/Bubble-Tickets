@@ -1,5 +1,7 @@
+import LoadingState from "@/components/loading-state";
 import { TicketDetails, TicketStatus } from "@/domain/domain";
 import { getTicket, getTicketQr } from "@/lib/api";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { format } from "date-fns";
 import { Calendar, DollarSign, MapPin, Tag } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -39,13 +41,7 @@ const DashboardViewTicketPage: React.FC = () => {
         setQrCodeUrl(createdUrl);
       } catch (err) {
         if (ignore) return;
-        if (err instanceof Error) {
-          setError(err.message);
-        } else if (typeof err === "string") {
-          setError(err);
-        } else {
-          setError("An unknown error has occurred");
-        }
+        setError(getErrorMessage(err));
       } finally {
         if (!ignore) setIsQrCodeLoading(false);
       }
@@ -73,7 +69,11 @@ const DashboardViewTicketPage: React.FC = () => {
   };
 
   if (!ticket) {
-    return <p>Loading..</p>;
+    return (
+      <div className="bg-black min-h-screen text-white">
+        <LoadingState label="Loading ticket…" />
+      </div>
+    );
   }
 
   return (

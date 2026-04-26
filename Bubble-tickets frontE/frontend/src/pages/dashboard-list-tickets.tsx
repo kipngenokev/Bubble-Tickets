@@ -1,9 +1,12 @@
+import EmptyState from "@/components/empty-state";
+import LoadingState from "@/components/loading-state";
 import NavBar from "@/components/nav-bar";
 import { SimplePagination } from "@/components/simple-pagination";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { SpringBootPagination, TicketSummary } from "@/domain/domain";
 import { listTickets } from "@/lib/api";
+import { getErrorMessage } from "@/lib/get-error-message";
 import { AlertCircle, DollarSign, Tag, Ticket } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "react-oidc-context";
@@ -31,13 +34,7 @@ const DashboardListTickets: React.FC = () => {
         if (!ignore) setTickets(data);
       } catch (err) {
         if (ignore) return;
-        if (err instanceof Error) {
-          setError(err.message);
-        } else if (typeof err === "string") {
-          setError(err);
-        } else {
-          setError("An unknown error occurred");
-        }
+        setError(getErrorMessage(err));
       }
     };
 
@@ -70,8 +67,17 @@ const DashboardListTickets: React.FC = () => {
         <p>Tickets you have purchased</p>
       </div>
 
-      <div className="max-w-lg mx-auto">
-        {tickets?.content.map((ticketItem) => (
+      <div className="max-w-lg mx-auto px-4">
+        {!tickets ? (
+          <LoadingState label="Loading tickets…" />
+        ) : tickets.content.length === 0 ? (
+          <EmptyState
+            icon={<Ticket className="h-10 w-10" />}
+            title="No tickets yet"
+            description="Tickets you purchase will appear here."
+          />
+        ) : (
+          tickets.content.map((ticketItem) => (
           <Link
             key={ticketItem.id}
             to={`/dashboard/tickets/${ticketItem.id}`}
@@ -108,13 +114,14 @@ const DashboardListTickets: React.FC = () => {
               </CardContent>
             </Card>
           </Link>
-        ))}
-      </div>
-      <div className="flex justify-center py-8">
-        {tickets && (
-          <SimplePagination pagination={tickets} onPageChange={setPage} />
+          ))
         )}
       </div>
+      {tickets && tickets.totalPages > 1 && (
+        <div className="flex justify-center py-8">
+          <SimplePagination pagination={tickets} onPageChange={setPage} />
+        </div>
+      )}
     </div>
   );
 };

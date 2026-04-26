@@ -1,4 +1,6 @@
 import NavBar from "@/components/nav-bar";
+import EmptyState from "@/components/empty-state";
+import LoadingState from "@/components/loading-state";
 import { SimplePagination } from "@/components/simple-pagination";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -24,9 +26,11 @@ import {
   SpringBootPagination,
 } from "@/domain/domain";
 import { deleteEvent, listEvents } from "@/lib/api";
+import { getErrorMessage } from "@/lib/get-error-message";
 import {
   AlertCircle,
   Calendar,
+  CalendarPlus,
   Clock,
   Edit,
   MapPin,
@@ -65,9 +69,7 @@ const DashboardListEventsPage: React.FC = () => {
         if (!ignore) setEvents(data);
       } catch (err) {
         if (ignore) return;
-        if (err instanceof Error) setError(err.message);
-        else if (typeof err === "string") setError(err);
-        else setError("An unknown error has occurred");
+        setError(getErrorMessage(err));
       }
     })();
     return () => {
@@ -79,13 +81,7 @@ const DashboardListEventsPage: React.FC = () => {
     try {
       setEvents(await listEvents(accessToken, page));
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else if (typeof err === "string") {
-        setError(err);
-      } else {
-        setError("An unknown error has occurred");
-      }
+      setError(getErrorMessage(err));
     }
   };
 
@@ -125,16 +121,18 @@ const DashboardListEventsPage: React.FC = () => {
     }
   };
 
-  const handleOpenDeleteEventDialog = (eventToDelete: EventSummary) => {
-    setEventToDelete(undefined);
-    setEventToDelete(eventToDelete);
+  const handleOpenDeleteEventDialog = (event: EventSummary) => {
+    setEventToDelete(event);
+    setDeleteEventError(undefined);
     setDialogOpen(true);
   };
 
-  const handleCancelDeleteEventDialog = () => {
-    setEventToDelete(undefined);
-    setEventToDelete(undefined);
-    setDialogOpen(false);
+  const handleDialogOpenChange = (open: boolean) => {
+    setDialogOpen(open);
+    if (!open) {
+      setEventToDelete(undefined);
+      setDeleteEventError(undefined);
+    }
   };
 
   const handleDeleteEvent = async () => {
@@ -149,13 +147,7 @@ const DashboardListEventsPage: React.FC = () => {
       setDialogOpen(false);
       refreshEvents(user.access_token);
     } catch (err) {
-      if (err instanceof Error) {
-        setDeleteEventError(err.message);
-      } else if (typeof err === "string") {
-        setDeleteEventError(err);
-      } else {
-        setDeleteEventError("An unknown error has occurred");
-      }
+      setDeleteEventError(getErrorMessage(err));
     }
   };
 
@@ -192,8 +184,24 @@ const DashboardListEventsPage: React.FC = () => {
         </div>
 
         {/* Event Cards */}
+        {!events ? (
+          <LoadingState label="Loading events…" />
+        ) : events.content.length === 0 ? (
+          <EmptyState
+            icon={<CalendarPlus className="h-10 w-10" />}
+            title="No events yet"
+            description="Create your first event to start selling tickets."
+            action={
+              <Link to="/dashboard/events/create">
+                <Button className="bg-purple-700 hover:bg-purple-500 cursor-pointer">
+                  Create Event
+                </Button>
+              </Link>
+            }
+          />
+        ) : (
         <div className="space-y-2">
-          {events?.content.map((eventItem) => (
+          {events.content.map((eventItem) => (
             <Card
               key={eventItem.id}
               className="bg-gray-900 border-gray-700 text-white"
@@ -269,6 +277,7 @@ const DashboardListEventsPage: React.FC = () => {
                 </Link>
                 <Button
                   type="button"
+                  aria-label={`Delete event ${eventItem.name}`}
                   className="bg-red-700/80 hover:bg-red-500 cursor-pointer"
                   onClick={() => handleOpenDeleteEventDialog(eventItem)}
                 >
@@ -278,13 +287,14 @@ const DashboardListEventsPage: React.FC = () => {
             </Card>
           ))}
         </div>
-      </div>
-      <div className="flex justify-center py-8">
-        {events && (
-          <SimplePagination pagination={events} onPageChange={setPage} />
         )}
       </div>
-      <AlertDialog open={dialogOpen}>
+      {events && events.totalPages > 1 && (
+        <div className="flex justify-center py-8">
+          <SimplePagination pagination={events} onPageChange={setPage} />
+        </div>
+      )}
+      <AlertDialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -301,9 +311,7 @@ const DashboardListEventsPage: React.FC = () => {
             </Alert>
           )}
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelDeleteEventDialog}>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={() => handleDeleteEvent()}>
               Continue
             </AlertDialogAction>

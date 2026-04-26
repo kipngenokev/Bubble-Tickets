@@ -1,14 +1,34 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 
-const RandomEventImage: React.FC = () => {
-  const [imageSrc, setImageSrc] = useState("");
+const IMAGE_COUNT = 4;
 
-  useEffect(() => {
-    const randomIndex = Math.floor(Math.random() * 4) + 1;
-    setImageSrc(`/event-image-${randomIndex}.webp`);
-  }, []);
+interface RandomEventImageProps {
+  seed?: string;
+  alt?: string;
+}
 
-  return <img src={imageSrc} alt="Random Event" className="object-cover" />;
+const hashSeed = (seed: string): number => {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+};
+
+const RandomEventImage: React.FC<RandomEventImageProps> = ({
+  seed,
+  alt = "Event banner",
+}) => {
+  const imageSrc = useMemo(() => {
+    const index = seed
+      ? (hashSeed(seed) % IMAGE_COUNT) + 1
+      : Math.floor(Math.random() * IMAGE_COUNT) + 1;
+    return `/event-image-${index}.webp`;
+  }, [seed]);
+
+  return (
+    <img src={imageSrc} alt={alt} className="object-cover w-full h-full" />
+  );
 };
 
 export default RandomEventImage;
