@@ -10,7 +10,7 @@ import com.lesha.bubble_tickets.domain.entities.TicketType;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface EventMapper {
 
     CreateTicketTypeRequest fromDto(CreateTicketTypeRequestDto dto);
