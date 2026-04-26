@@ -40,12 +40,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(QrCodeNotFoundException.class)
     public ResponseEntity<ErrorDto> handleQrCodeNotFoundException (
-            QrCodeGenerationException ex
+            QrCodeNotFoundException ex
     ) {
         log.error("Caught QrCodeNotFoundException", ex);
         ErrorDto errorDto = new ErrorDto();
         errorDto.setError("Qr Code not found");
-        return new ResponseEntity<>(errorDto, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorDto, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(QrCodeGenerationException.class)
