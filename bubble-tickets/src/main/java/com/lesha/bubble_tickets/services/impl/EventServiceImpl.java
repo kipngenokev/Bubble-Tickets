@@ -97,9 +97,10 @@ public class EventServiceImpl implements EventService {
         existingEvent.setEnd(event.getEnd());
         existingEvent.setVenue(event.getVenue());
         existingEvent.setSalesStart(event.getSalesStart());
+        existingEvent.setSalesEnd(event.getSalesEnd());
         existingEvent.setStatus(event.getStatus());
 
-        Set<UUID> requestTicketTypeIds = event.getTicketType()
+        Set<UUID> requestTicketTypeIds = event.getTicketTypes()
                 .stream()
                 .map(UpdateTicketTypeRequest::getId)
                 .filter(Objects::nonNull)
@@ -111,7 +112,7 @@ public class EventServiceImpl implements EventService {
         Map<UUID, TicketType> existingTicketTypesIndex = existingEvent.getTicketTypes().stream()
                 .collect(Collectors.toMap(TicketType::getId, Function.identity()));
 
-        for(UpdateTicketTypeRequest ticketType : event.getTicketType()) {
+        for(UpdateTicketTypeRequest ticketType : event.getTicketTypes()) {
             if(null == ticketType.getId()) {
                 TicketType ticketTypeToCreate = new TicketType();
                 ticketTypeToCreate.setName(ticketType.getName());
