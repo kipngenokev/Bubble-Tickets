@@ -24,11 +24,25 @@ const AttendeeLandingPage: React.FC = () => {
   const [query, setQuery] = useState<string | undefined>();
 
   useEffect(() => {
-    if (query && query.length > 0) {
-      queryPublishedEvents();
-    } else {
-      refreshPublishedEvents();
-    }
+    let ignore = false;
+    const run = async () => {
+      try {
+        const data =
+          query && query.length > 0
+            ? await searchPublishedEvents(query, page)
+            : await listPublishedEvents(page);
+        if (!ignore) setPublishedEvents(data);
+      } catch (err) {
+        if (ignore) return;
+        if (err instanceof Error) setError(err.message);
+        else if (typeof err === "string") setError(err);
+        else setError("An unknown error has occurred");
+      }
+    };
+    run();
+    return () => {
+      ignore = true;
+    };
   }, [page]);
 
   const refreshPublishedEvents = async () => {

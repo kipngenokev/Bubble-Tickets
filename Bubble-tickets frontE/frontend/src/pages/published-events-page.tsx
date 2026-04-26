@@ -30,15 +30,18 @@ const PublishedEventsPage: React.FC = () => {
       setError("ID must be provided!");
       return;
     }
+    let ignore = false;
 
     const doUseEffect = async () => {
       try {
         const eventData = await getPublishedEvent(id);
+        if (ignore) return;
         setPublishedEvent(eventData);
         if (eventData.ticketTypes.length > 0) {
           setSelectedTicketType(eventData.ticketTypes[0]);
         }
       } catch (err) {
+        if (ignore) return;
         if (err instanceof Error) {
           setError(err.message);
         } else if (typeof err === "string") {
@@ -49,6 +52,9 @@ const PublishedEventsPage: React.FC = () => {
       }
     };
     doUseEffect();
+    return () => {
+      ignore = true;
+    };
   }, [id]);
 
   if (error) {

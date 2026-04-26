@@ -57,7 +57,22 @@ const DashboardListEventsPage: React.FC = () => {
     if (isLoading || !user?.access_token) {
       return;
     }
-    refreshEvents(user.access_token);
+    let ignore = false;
+    const token = user.access_token;
+    (async () => {
+      try {
+        const data = await listEvents(token, page);
+        if (!ignore) setEvents(data);
+      } catch (err) {
+        if (ignore) return;
+        if (err instanceof Error) setError(err.message);
+        else if (typeof err === "string") setError(err);
+        else setError("An unknown error has occurred");
+      }
+    })();
+    return () => {
+      ignore = true;
+    };
   }, [isLoading, user, page]);
 
   const refreshEvents = async (accessToken: string) => {
@@ -179,7 +194,10 @@ const DashboardListEventsPage: React.FC = () => {
         {/* Event Cards */}
         <div className="space-y-2">
           {events?.content.map((eventItem) => (
-            <Card className="bg-gray-900 border-gray-700 text-white">
+            <Card
+              key={eventItem.id}
+              className="bg-gray-900 border-gray-700 text-white"
+            >
               <CardHeader>
                 <div className="flex justify-between">
                   <h3 className="font-bold text-xl">{eventItem.name}</h3>

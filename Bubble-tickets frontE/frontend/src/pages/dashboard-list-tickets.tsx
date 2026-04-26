@@ -22,11 +22,15 @@ const DashboardListTickets: React.FC = () => {
     if (isLoading || !user?.access_token) {
       return;
     }
+    let ignore = false;
+    const token = user.access_token;
 
     const doUseEffect = async () => {
       try {
-        setTickets(await listTickets(user.access_token, page));
+        const data = await listTickets(token, page);
+        if (!ignore) setTickets(data);
       } catch (err) {
+        if (ignore) return;
         if (err instanceof Error) {
           setError(err.message);
         } else if (typeof err === "string") {
@@ -38,6 +42,9 @@ const DashboardListTickets: React.FC = () => {
     };
 
     doUseEffect();
+    return () => {
+      ignore = true;
+    };
   }, [isLoading, user?.access_token, page]);
 
   if (error) {
@@ -65,8 +72,11 @@ const DashboardListTickets: React.FC = () => {
 
       <div className="max-w-lg mx-auto">
         {tickets?.content.map((ticketItem) => (
-          <Link to={`/dashboard/tickets/${ticketItem.id}`}>
-            <Card key={ticketItem.id} className="bg-gray-900 text-white">
+          <Link
+            key={ticketItem.id}
+            to={`/dashboard/tickets/${ticketItem.id}`}
+          >
+            <Card className="bg-gray-900 text-white">
               <CardHeader>
                 <div className="flex justify-between">
                   <div className="flex items-center gap-2">

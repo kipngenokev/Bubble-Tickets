@@ -19,15 +19,26 @@ const DashboardViewTicketPage: React.FC = () => {
     if (isLoading || !user?.access_token || !id) {
       return;
     }
+    let ignore = false;
+    let createdUrl: string | undefined;
+    const accessToken = user.access_token;
+    const ticketId = id;
 
-    const doUseEffect = async (accessToken: string, id: string) => {
+    const doUseEffect = async () => {
       try {
         setIsQrCodeLoading(true);
         setError(undefined);
 
-        setTicket(await getTicket(accessToken, id));
-        setQrCodeUrl(URL.createObjectURL(await getTicketQr(accessToken, id)));
+        const ticketData = await getTicket(accessToken, ticketId);
+        if (ignore) return;
+        setTicket(ticketData);
+
+        const qrBlob = await getTicketQr(accessToken, ticketId);
+        if (ignore) return;
+        createdUrl = URL.createObjectURL(qrBlob);
+        setQrCodeUrl(createdUrl);
       } catch (err) {
+        if (ignore) return;
         if (err instanceof Error) {
           setError(err.message);
         } else if (typeof err === "string") {
@@ -36,15 +47,16 @@ const DashboardViewTicketPage: React.FC = () => {
           setError("An unknown error has occurred");
         }
       } finally {
-        setIsQrCodeLoading(false);
+        if (!ignore) setIsQrCodeLoading(false);
       }
     };
 
-    doUseEffect(user?.access_token, id);
+    doUseEffect();
 
     return () => {
-      if (qrCodeUrl) {
-        URL.revokeObjectURL(qrCodeUrl);
+      ignore = true;
+      if (createdUrl) {
+        URL.revokeObjectURL(createdUrl);
       }
     };
   }, [user?.access_token, isLoading, id]);
