@@ -53,7 +53,7 @@ const DashboardValidateQrPage: React.FC = () => {
   };
 
   if (isLoading || !user?.access_token) {
-    <p>Loading...</p>;
+    return <p>Loading...</p>;
   }
 
   return (
