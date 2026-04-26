@@ -23,8 +23,9 @@ public class SecurityConfig {
 
                         authorize
                                 .requestMatchers(HttpMethod.GET,"/api/v1/published-events/**").permitAll()
-                                .requestMatchers("/api/v1/events").hasRole("ORGANIZER")
-                                .requestMatchers("/api/v1/ticket-validations").hasRole("STAFF")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/events/*/ticket-types/*/tickets").authenticated()
+                                .requestMatchers("/api/v1/events/**").hasRole("ORGANIZER")
+                                .requestMatchers("/api/v1/ticket-validations/**").hasRole("STAFF")
                                 .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->

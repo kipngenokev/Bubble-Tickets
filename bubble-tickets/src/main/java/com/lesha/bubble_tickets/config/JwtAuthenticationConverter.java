@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -32,7 +33,8 @@ public class JwtAuthenticationConverter implements Converter<Jwt, JwtAuthenticat
         List<String> roles = (List<String>)realmAccess.get("roles");
 
         return roles.stream()
-                .filter(role -> role.startsWith("ROLE_"))
+                .filter(Objects::nonNull)
+                .map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role)
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
