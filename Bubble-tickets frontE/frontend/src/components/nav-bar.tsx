@@ -29,7 +29,10 @@ const NavBar: React.FC = () => {
           </div>
 
           <DropdownMenu>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger
+              aria-label="Open user menu"
+              className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-500"
+            >
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-gray-700">
                   {user?.profile?.preferred_username?.slice(0, 2).toUpperCase()}
@@ -44,7 +47,7 @@ const NavBar: React.FC = () => {
                 <p className="text-sm font-medium">
                   {user?.profile?.preferred_username}
                 </p>
-                <p className="text-sm text-gray-400">{user?.profile?.email}</p>
+                <p className="text-sm text-gray-300">{user?.profile?.email}</p>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem

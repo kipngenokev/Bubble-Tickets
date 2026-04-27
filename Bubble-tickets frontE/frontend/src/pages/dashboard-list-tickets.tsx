@@ -86,7 +86,7 @@ const DashboardListTickets: React.FC = () => {
               <CardHeader>
                 <div className="flex justify-between">
                   <div className="flex items-center gap-2">
-                    <Ticket className="h-5 w-5 text-gray-400" />
+                    <Ticket className="h-5 w-5 text-gray-300" />
                     <h3 className="font-bold text-xl">
                       {ticketItem.ticketType.name}
                     </h3>
@@ -97,16 +97,16 @@ const DashboardListTickets: React.FC = () => {
               <CardContent className="space-y-4">
                 {/* Price */}
                 <div className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-gray-400" />
+                  <DollarSign className="h-5 w-5 text-gray-300" />
                   <p className="font-medium">${ticketItem.ticketType.price}</p>
                 </div>
 
                 {/* Ticket ID */}
                 <div className="flex items-center gap-2">
-                  <Tag className="h-5 w-5 text-gray-400" />
+                  <Tag className="h-5 w-5 text-gray-300" />
                   <div>
                     <h4 className="font-medium">Ticket ID</h4>
-                    <p className="text-gray-400 font-mono text-sm">
+                    <p className="text-gray-300 font-mono text-sm">
                       {ticketItem.id}
                     </p>
                   </div>

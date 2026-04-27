@@ -16,6 +16,7 @@ import DashboardListTickets from "./pages/dashboard-list-tickets.tsx";
 import DashboardPage from "./pages/dashboard-page.tsx";
 import DashboardViewTicketPage from "./pages/dashboard-view-ticket-page.tsx";
 import DashboardValidateQrPage from "./pages/dashboard-validate-qr-page.tsx";
+import { ErrorBoundary } from "./components/error-boundary.tsx";
 
 const router = createBrowserRouter([
   {
@@ -112,8 +113,10 @@ const oidcConfig = {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <AuthProvider {...oidcConfig}>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider {...oidcConfig}>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </ErrorBoundary>
   </StrictMode>,
 );

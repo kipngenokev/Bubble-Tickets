@@ -442,15 +442,15 @@ const DashboardManageEventPage: React.FC = () => {
           {isEditMode ? (
             <>
               {eventData.id && (
-                <p className="text-sm text-gray-400">ID: {eventData.id}</p>
+                <p className="text-sm text-gray-300">ID: {eventData.id}</p>
               )}
               {eventData.createdAt && (
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-gray-300">
                   Created At: {format(eventData.createdAt, "PPP")}
                 </p>
               )}
               {eventData.updatedAt && (
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-gray-300">
                   Updated At: {format(eventData.updatedAt, "PPP")}
                 </p>
               )}
@@ -476,7 +476,7 @@ const DashboardManageEventPage: React.FC = () => {
                 required
               />
             </div>
-            <p className="text-gray-400 text-xs">
+            <p className="text-gray-300 text-xs">
               This is the public name of your event.
             </p>
           </div>
@@ -492,7 +492,7 @@ const DashboardManageEventPage: React.FC = () => {
               enabled={eventDateEnabled}
               setEnabled={setEventDateEnabled}
             />
-            <p className="text-gray-400 text-xs">
+            <p className="text-gray-300 text-xs">
               The date and time that the event starts.
             </p>
           </div>
@@ -508,7 +508,7 @@ const DashboardManageEventPage: React.FC = () => {
               enabled={eventDateEnabled}
               setEnabled={setEventDateEnabled}
             />
-            <p className="text-gray-400 text-xs">
+            <p className="text-gray-300 text-xs">
               The date and time that the event ends.
             </p>
           </div>
@@ -523,7 +523,7 @@ const DashboardManageEventPage: React.FC = () => {
               value={eventData.venueDetails}
               onChange={(e) => updateField("venueDetails", e.target.value)}
             />
-            <p className="text-gray-400 text-xs">
+            <p className="text-gray-300 text-xs">
               Details about the venue, please include as much detail as
               possible.
             </p>
@@ -540,7 +540,7 @@ const DashboardManageEventPage: React.FC = () => {
               enabled={eventSalesDateEnabled}
               setEnabled={setEventSalesDateEnabled}
             />
-            <p className="text-gray-400 text-xs">
+            <p className="text-gray-300 text-xs">
               The date and time that ticket are available to purchase for the
               event.
             </p>
@@ -557,7 +557,7 @@ const DashboardManageEventPage: React.FC = () => {
               enabled={eventSalesDateEnabled}
               setEnabled={setEventSalesDateEnabled}
             />
-            <p className="text-gray-400 text-xs">
+            <p className="text-gray-300 text-xs">
               The date and time that ticket are available to purchase for the
               event.
             </p>
@@ -602,7 +602,7 @@ const DashboardManageEventPage: React.FC = () => {
                               </Badge>
                             </div>
                             {ticketType.totalAvailable && (
-                              <p className="text-gray-400">
+                              <p className="text-gray-300">
                                 {ticketType.totalAvailable} tickets available
                               </p>
                             )}
@@ -612,19 +612,21 @@ const DashboardManageEventPage: React.FC = () => {
                             <Button
                               type="button"
                               variant="ghost"
+                              aria-label={`Edit ticket type ${ticketType.name}`}
                               onClick={() => handleEditTicketType(ticketType)}
                             >
-                              <Edit />
+                              <Edit aria-hidden="true" />
                             </Button>
                             <Button
                               type="button"
                               variant="ghost"
+                              aria-label={`Delete ticket type ${ticketType.name}`}
                               className="text-red-400"
                               onClick={() =>
                                 handleDeleteTicketType(ticketType.id)
                               }
                             >
-                              <Trash />
+                              <Trash aria-hidden="true" />
                             </Button>
                           </div>
                         </div>
@@ -635,7 +637,7 @@ const DashboardManageEventPage: React.FC = () => {
                 <DialogContent className="bg-gray-900 border-gray-700 text-white">
                   <DialogHeader>
                     <DialogTitle>Add Ticket Type</DialogTitle>
-                    <DialogDescription className="text-gray-400">
+                    <DialogDescription className="text-gray-300">
                       Please enter details of the ticket type
                     </DialogDescription>
                   </DialogHeader>
@@ -755,7 +757,7 @@ const DashboardManageEventPage: React.FC = () => {
                 </SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-gray-400 text-xs">
+            <p className="text-gray-300 text-xs">
               Please select the status of the new event.
             </p>
           </div>

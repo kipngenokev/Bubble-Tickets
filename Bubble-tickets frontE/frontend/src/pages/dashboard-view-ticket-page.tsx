@@ -64,7 +64,7 @@ const DashboardViewTicketPage: React.FC = () => {
       case TicketStatus.CANCELLED:
         return "text-red-400";
       default:
-        return "text-gray-400";
+        return "text-gray-300";
     }
   };
 

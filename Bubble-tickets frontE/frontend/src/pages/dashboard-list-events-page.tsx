@@ -219,13 +219,13 @@ const DashboardListEventsPage: React.FC = () => {
               <CardContent className="space-y-4">
                 {/* Event Start & End */}
                 <div className="flex space-x-2">
-                  <Calendar className="h-5 w-5 text-gray-400" />
+                  <Calendar className="h-5 w-5 text-gray-300" />
                   <div>
                     <p className="font-medium">
                       {formatDate(eventItem.start)} to{" "}
                       {formatDate(eventItem.end)}
                     </p>
-                    <p className="text-gray-400">
+                    <p className="text-gray-300">
                       {formatTime(eventItem.start)} -{" "}
                       {formatTime(eventItem.end)}
                     </p>
@@ -233,30 +233,30 @@ const DashboardListEventsPage: React.FC = () => {
                 </div>
                 {/* Sales start and end */}
                 <div className="flex space-x-2">
-                  <Clock className="h-5 w-5 text-gray-400" />
+                  <Clock className="h-5 w-5 text-gray-300" />
                   <div>
                     <h4 className="font-medium">Sales Period</h4>
-                    <p className="text-gray-400">
+                    <p className="text-gray-300">
                       {formatDate(eventItem.salesStart)} to{" "}
                       {formatDate(eventItem.salesEnd)}
                     </p>
                   </div>
                 </div>
                 <div className="flex space-x-2">
-                  <MapPin className="h-5 w-5 text-gray-400" />
+                  <MapPin className="h-5 w-5 text-gray-300" />
                   <div>
                     <p className="font-medium">{eventItem.venue}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Tag className="h-5 w-5 text-gray-400" />
+                  <Tag className="h-5 w-5 text-gray-300" />
                   <div>
                     <h4 className="font-medium">Ticket Types</h4>
                     <ul>
                       {eventItem.ticketTypes.map((ticketType) => (
                         <li
                           key={ticketType.id}
-                          className="flex gap-2 text-gray-400"
+                          className="flex gap-2 text-gray-300"
                         >
                           <span>{ticketType.name}</span>
                           <span>${ticketType.price}</span>
@@ -270,9 +270,10 @@ const DashboardListEventsPage: React.FC = () => {
                 <Link to={`/dashboard/events/update/${eventItem.id}`}>
                   <Button
                     type="button"
+                    aria-label={`Edit event ${eventItem.name}`}
                     className="bg-gray-700 hover:bg-gray-500 cursor-pointer"
                   >
-                    <Edit />
+                    <Edit aria-hidden="true" />
                   </Button>
                 </Link>
                 <Button
