@@ -37,6 +37,7 @@ import {
   UpdateTicketTypeRequest,
 } from "@/domain/domain";
 import { createEvent, getEvent, updateEvent } from "@/lib/api";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import {
   AlertCircle,
@@ -47,8 +48,26 @@ import {
   Trash,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useAuth } from "react-oidc-context";
 import { useNavigate, useParams } from "react-router";
+import { z } from "zod";
+
+const ticketTypeSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  price: z.coerce
+    .number({ invalid_type_error: "Price must be a number" })
+    .min(0, "Price cannot be negative"),
+  totalAvailable: z.coerce
+    .number({ invalid_type_error: "Must be a number" })
+    .int("Must be a whole number")
+    .min(0, "Cannot be negative"),
+  description: z.string(),
+});
+
+type TicketTypeFormValues = z.infer<typeof ticketTypeSchema>;
+
+const eventNameSchema = z.string().min(1, "Event name is required");
 
 interface DateTimeSelectProperties {
   date: Date | undefined;
@@ -171,20 +190,33 @@ const DashboardManageEventPage: React.FC = () => {
     updatedAt: undefined,
   });
 
-  const [currentTicketType, setCurrentTicketType] = useState<
-    TicketTypeData | undefined
-  >();
-
+  const [editingTicketId, setEditingTicketId] = useState<string | undefined>();
   const [dialogOpen, setDialogOpen] = useState(false);
-
   const [eventDateEnabled, setEventDateEnabled] = useState(false);
   const [eventSalesDateEnabled, setEventSalesDateEnabled] = useState(false);
-
   const [error, setError] = useState<string | undefined>();
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const {
+    register: registerTicket,
+    handleSubmit: handleTicketSubmit,
+    reset: resetTicketForm,
+    formState: { errors: ticketErrors },
+  } = useForm<TicketTypeFormValues>({
+    resolver: zodResolver(ticketTypeSchema),
+    defaultValues: { name: "", price: 0, totalAvailable: 0, description: "" },
+  });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateField = (field: keyof EventData, value: any) => {
     setEventData((prev) => ({ ...prev, [field]: value }));
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
   };
 
   useEffect(() => {
@@ -258,6 +290,53 @@ const DashboardManageEventPage: React.FC = () => {
     );
 
     return utcResult;
+  };
+
+  const validateEventForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    const nameResult = eventNameSchema.safeParse(eventData.name);
+    if (!nameResult.success) {
+      errors.name = nameResult.error.errors[0].message;
+    }
+
+    if (
+      eventDateEnabled &&
+      eventData.startDate &&
+      eventData.startTime &&
+      eventData.endDate &&
+      eventData.endTime
+    ) {
+      const start = combineDateTime(eventData.startDate, eventData.startTime);
+      const end = combineDateTime(eventData.endDate, eventData.endTime);
+      if (end <= start) {
+        errors.endDate = "End date/time must be after start date/time";
+      }
+    }
+
+    if (
+      eventSalesDateEnabled &&
+      eventData.salesStartDate &&
+      eventData.salesStartTime &&
+      eventData.salesEndDate &&
+      eventData.salesEndTime
+    ) {
+      const salesStart = combineDateTime(
+        eventData.salesStartDate,
+        eventData.salesStartTime,
+      );
+      const salesEnd = combineDateTime(
+        eventData.salesEndDate,
+        eventData.salesEndTime,
+      );
+      if (salesEnd <= salesStart) {
+        errors.salesEndDate =
+          "Sales end date/time must be after sales start date/time";
+      }
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleEventUpdateSubmit = async (accessToken: string, id: string) => {
@@ -364,6 +443,10 @@ const DashboardManageEventPage: React.FC = () => {
     e.preventDefault();
     setError(undefined);
 
+    if (!validateEventForm()) {
+      return;
+    }
+
     if (isLoading || !user || !user.access_token) {
       console.error("User not found!");
       return;
@@ -381,35 +464,29 @@ const DashboardManageEventPage: React.FC = () => {
   };
 
   const handleAddTicketType = () => {
-    setCurrentTicketType({
-      id: undefined,
-      name: "",
-      price: 0,
-      totalAvailable: 0,
-      description: "",
-    });
+    setEditingTicketId(undefined);
+    resetTicketForm({ name: "", price: 0, totalAvailable: 0, description: "" });
     setDialogOpen(true);
   };
 
-  const handleSaveTicketType = () => {
-    if (!currentTicketType) {
-      return;
-    }
+  const onSaveTicketType = (values: TicketTypeFormValues) => {
+    const ticketData: TicketTypeData = {
+      id: editingTicketId,
+      name: values.name,
+      price: values.price,
+      totalAvailable: values.totalAvailable === 0 ? undefined : values.totalAvailable,
+      description: values.description,
+    };
 
     const newTicketTypes = [...eventData.ticketTypes];
 
-    if (currentTicketType.id) {
-      const index = newTicketTypes.findIndex(
-        (t) => t.id === currentTicketType.id,
-      );
+    if (editingTicketId) {
+      const index = newTicketTypes.findIndex((t) => t.id === editingTicketId);
       if (index !== -1) {
-        newTicketTypes[index] = currentTicketType;
+        newTicketTypes[index] = ticketData;
       }
     } else {
-      newTicketTypes.push({
-        ...currentTicketType,
-        id: generateTempId(),
-      });
+      newTicketTypes.push({ ...ticketData, id: generateTempId() });
     }
 
     updateField("ticketTypes", newTicketTypes);
@@ -417,7 +494,13 @@ const DashboardManageEventPage: React.FC = () => {
   };
 
   const handleEditTicketType = (ticketType: TicketTypeData) => {
-    setCurrentTicketType(ticketType);
+    setEditingTicketId(ticketType.id);
+    resetTicketForm({
+      name: ticketType.name,
+      price: ticketType.price,
+      totalAvailable: ticketType.totalAvailable ?? 0,
+      description: ticketType.description,
+    });
     setDialogOpen(true);
   };
 
@@ -473,8 +556,10 @@ const DashboardManageEventPage: React.FC = () => {
                 placeholder="Event Name"
                 value={eventData.name}
                 onChange={(e) => updateField("name", e.target.value)}
-                required
               />
+              {fieldErrors.name && (
+                <p className="text-red-400 text-xs mt-1">{fieldErrors.name}</p>
+              )}
             </div>
             <p className="text-gray-300 text-xs">
               This is the public name of your event.
@@ -508,6 +593,9 @@ const DashboardManageEventPage: React.FC = () => {
               enabled={eventDateEnabled}
               setEnabled={setEventDateEnabled}
             />
+            {fieldErrors.endDate && (
+              <p className="text-red-400 text-xs mt-1">{fieldErrors.endDate}</p>
+            )}
             <p className="text-gray-300 text-xs">
               The date and time that the event ends.
             </p>
@@ -557,6 +645,11 @@ const DashboardManageEventPage: React.FC = () => {
               enabled={eventSalesDateEnabled}
               setEnabled={setEventSalesDateEnabled}
             />
+            {fieldErrors.salesEndDate && (
+              <p className="text-red-400 text-xs mt-1">
+                {fieldErrors.salesEndDate}
+              </p>
+            )}
             <p className="text-gray-300 text-xs">
               The date and time that ticket are available to purchase for the
               event.
@@ -634,9 +727,12 @@ const DashboardManageEventPage: React.FC = () => {
                     );
                   })}
                 </CardContent>
+
                 <DialogContent className="bg-gray-900 border-gray-700 text-white">
                   <DialogHeader>
-                    <DialogTitle>Add Ticket Type</DialogTitle>
+                    <DialogTitle>
+                      {editingTicketId ? "Edit Ticket Type" : "Add Ticket Type"}
+                    </DialogTitle>
                     <DialogDescription className="text-gray-300">
                       Please enter details of the ticket type
                     </DialogDescription>
@@ -648,16 +744,14 @@ const DashboardManageEventPage: React.FC = () => {
                     <Input
                       id="ticket-type-name"
                       className="bg-gray-800 border-gray-700"
-                      value={currentTicketType?.name}
-                      onChange={(e) =>
-                        setCurrentTicketType(
-                          currentTicketType
-                            ? { ...currentTicketType, name: e.target.value }
-                            : undefined,
-                        )
-                      }
                       placeholder="e.g General Admission, VIP, etc."
+                      {...registerTicket("name")}
                     />
+                    {ticketErrors.name && (
+                      <p className="text-red-400 text-xs">
+                        {ticketErrors.name.message}
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex gap-4">
@@ -667,19 +761,15 @@ const DashboardManageEventPage: React.FC = () => {
                       <Input
                         id="ticket-type-price"
                         type="number"
-                        value={currentTicketType?.price}
-                        onChange={(e) =>
-                          setCurrentTicketType(
-                            currentTicketType
-                              ? {
-                                  ...currentTicketType,
-                                  price: Number.parseFloat(e.target.value),
-                                }
-                              : undefined,
-                          )
-                        }
+                        step="0.01"
                         className="bg-gray-800 border-gray-700"
+                        {...registerTicket("price")}
                       />
+                      {ticketErrors.price && (
+                        <p className="text-red-400 text-xs">
+                          {ticketErrors.price.message}
+                        </p>
+                      )}
                     </div>
 
                     {/* Total Available */}
@@ -690,21 +780,15 @@ const DashboardManageEventPage: React.FC = () => {
                       <Input
                         id="ticket-type-total-available"
                         type="number"
-                        value={currentTicketType?.totalAvailable}
-                        onChange={(e) =>
-                          setCurrentTicketType(
-                            currentTicketType
-                              ? {
-                                  ...currentTicketType,
-                                  totalAvailable: Number.parseFloat(
-                                    e.target.value,
-                                  ),
-                                }
-                              : undefined,
-                          )
-                        }
                         className="bg-gray-800 border-gray-700"
+                        {...registerTicket("totalAvailable")}
                       />
+                      {ticketErrors.totalAvailable && (
+                        <p className="text-red-400 text-xs">
+                          {ticketErrors.totalAvailable.message}
+                        </p>
+                      )}
+                      <p className="text-gray-400 text-xs">0 = unlimited</p>
                     </div>
                   </div>
 
@@ -714,23 +798,15 @@ const DashboardManageEventPage: React.FC = () => {
                     <Textarea
                       id="ticket-type-description"
                       className="bg-gray-800 border-gray-700"
-                      value={currentTicketType?.description}
-                      onChange={(e) =>
-                        setCurrentTicketType(
-                          currentTicketType
-                            ? {
-                                ...currentTicketType,
-                                description: e.target.value,
-                              }
-                            : undefined,
-                        )
-                      }
+                      {...registerTicket("description")}
                     />
                   </div>
+
                   <DialogFooter>
                     <Button
+                      type="button"
                       className="bg-white text-black hover:bg-gray-300"
-                      onClick={handleSaveTicketType}
+                      onClick={handleTicketSubmit(onSaveTicketType)}
                     >
                       Save
                     </Button>
