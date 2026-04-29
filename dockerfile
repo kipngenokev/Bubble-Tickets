@@ -1,5 +1,5 @@
 # Build frontend
-FROM node:18-alpine as frontend-build
+FROM node:18-alpine AS frontend-build
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm install
@@ -7,10 +7,10 @@ COPY frontend/ .
 RUN npm run build
 
 # Build backend
-FROM maven:3.9-eclipse-temurin-17 as backend-build
+FROM maven:3.9-eclipse-temurin-17 AS backend-build
 WORKDIR /app
-COPY backend/pom.xml .
-COPY backend/src/ src/
+COPY bubble-tickets/pom.xml .
+COPY bubble-tickets/src/ src/
 RUN mvn clean package -DskipTests
 
 # Runtime
