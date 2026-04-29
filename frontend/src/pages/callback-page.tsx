@@ -6,7 +6,7 @@ import { AlertCircle } from "lucide-react";
 import { getErrorMessage } from "@/lib/get-error-message";
 
 const CallbackPage: React.FC = () => {
-  const { isLoading, isAuthenticated, userManager } = useAuth();
+  const { isLoading, isAuthenticated, error: authError } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | undefined>();
 
@@ -29,24 +29,13 @@ const CallbackPage: React.FC = () => {
       finalizeRedirect();
       return;
     }
+  }, [isLoading, isAuthenticated, navigate]);
 
-    let ignore = false;
-    const run = async () => {
-      try {
-        await userManager.signinRedirectCallback();
-        if (ignore) return;
-        finalizeRedirect();
-      } catch (err) {
-        if (ignore) return;
-        setError(getErrorMessage(err));
-      }
-    };
-
-    run();
-    return () => {
-      ignore = true;
-    };
-  }, [isLoading, isAuthenticated, navigate, userManager]);
+  useEffect(() => {
+    if (authError) {
+      setError(getErrorMessage(authError));
+    }
+  }, [authError]);
 
   if (isLoading) {
     return <p>Processing login...</p>;
