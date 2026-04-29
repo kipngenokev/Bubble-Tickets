@@ -6,7 +6,7 @@ services:
     plan: free
     healthCheckPath: /actuator/health
     dockerContext: .
-    dockerfilePath: bubble-tickets/dockerfile
+    dockerfilePath: dockerfile
     envVars:
       - key: SPRING_DATASOURCE_URL
         sync: false
