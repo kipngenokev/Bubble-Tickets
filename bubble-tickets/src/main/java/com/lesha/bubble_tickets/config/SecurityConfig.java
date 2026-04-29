@@ -25,7 +25,9 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET,"/api/v1/published-events/**").permitAll()
                                 .requestMatchers("/api/v1/events").hasRole("ORGANIZER")
                                 .requestMatchers("/api/v1/ticket-validations").hasRole("STAFF")
-                                .anyRequest().authenticated())
+                                .requestMatchers("/actuator/health").permitAll()
+                                .requestMatchers("/api/**").authenticated()
+                                .anyRequest().permitAll())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

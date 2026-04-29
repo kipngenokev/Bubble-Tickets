@@ -105,10 +105,23 @@ const router = createBrowserRouter([
   },
 ]);
 
+const oidcAuthority =
+  import.meta.env.VITE_OIDC_AUTHORITY ??
+  "http://localhost:9090/realms/event-ticket-platform";
+const oidcClientId =
+  import.meta.env.VITE_OIDC_CLIENT_ID ?? "event-ticket-platform";
+const oidcRedirectUri =
+  import.meta.env.VITE_OIDC_REDIRECT_URI ??
+  `${window.location.origin}/callback`;
+
 const oidcConfig = {
-  authority: "http://localhost:9090/realms/event-ticket-platform",
-  client_id: "event-ticket-platform-app",
-  redirect_uri: "http://localhost:5173/callback",
+  authority: oidcAuthority,
+  client_id: oidcClientId,
+  redirect_uri: oidcRedirectUri,
+  post_logout_redirect_uri: window.location.origin,
+  onSigninCallback: () => {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  },
 };
 
 createRoot(document.getElementById("root")!).render(

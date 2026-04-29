@@ -1,4 +1,6 @@
 import LoadingState from "@/components/loading-state";
+import NavBar from "@/components/nav-bar";
+import { Button } from "@/components/ui/button";
 import { TicketDetails, TicketStatus } from "@/domain/domain";
 import { getTicket, getTicketQr } from "@/lib/api";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -6,7 +8,7 @@ import { format } from "date-fns";
 import { Calendar, DollarSign, MapPin, Tag } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "react-oidc-context";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 const DashboardViewTicketPage: React.FC = () => {
   const [ticket, setTicket] = useState<TicketDetails | undefined>();
@@ -16,6 +18,7 @@ const DashboardViewTicketPage: React.FC = () => {
 
   const { id } = useParams();
   const { isLoading, user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isLoading || !user?.access_token || !id) {
@@ -71,13 +74,27 @@ const DashboardViewTicketPage: React.FC = () => {
   if (!ticket) {
     return (
       <div className="bg-black min-h-screen text-white">
+        <NavBar />
         <LoadingState label="Loading ticket…" />
       </div>
     );
   }
 
   return (
-    <div className="bg-black min-h-screen text-white flex items-center justify-center p-4">
+    <div className="bg-black min-h-screen text-white">
+      <NavBar />
+      <div className="max-w-3xl mx-auto px-4 pt-6">
+        <Button
+          type="button"
+          variant="ghost"
+          className="text-gray-300 hover:text-white"
+          onClick={() => navigate("/dashboard/tickets")}
+        >
+          Back to tickets
+        </Button>
+      </div>
+
+      <div className="flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="relative bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 rounded-3xl p-8 shadow-2xl">
           {/* Status */}
@@ -156,6 +173,7 @@ const DashboardViewTicketPage: React.FC = () => {
             <p className="text-purple-200 text-sm font-mono">{ticket.id}</p>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

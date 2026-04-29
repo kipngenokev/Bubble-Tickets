@@ -73,6 +73,8 @@ const PublishedEventsPage: React.FC = () => {
     );
   }
 
+  const canPurchase = !!selectedTicketType?.id;
+
   return (
     <div className="bg-black min-h-screen text-white">
       <PublicNavBar />
@@ -142,13 +144,19 @@ const PublishedEventsPage: React.FC = () => {
                   {selectedTicketType?.description}
                 </p>
               </div>
-              <Link
-                to={`/events/${publishedEvent.id}/purchase/${selectedTicketType?.id}`}
-              >
-                <Button className="w-full bg-purple-600 hover:bg-purple-700 cursor-pointer">
-                  Purchase Ticket
+              {canPurchase ? (
+                <Link
+                  to={`/events/${publishedEvent.id}/purchase/${selectedTicketType?.id}`}
+                >
+                  <Button className="w-full bg-purple-600 hover:bg-purple-700 cursor-pointer">
+                    Purchase Ticket
+                  </Button>
+                </Link>
+              ) : (
+                <Button className="w-full" disabled>
+                  No tickets available
                 </Button>
-              </Link>
+              )}
             </div>
           </div>
         </div>

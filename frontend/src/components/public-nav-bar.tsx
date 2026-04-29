@@ -26,6 +26,19 @@ const PublicNavBar: React.FC = () => {
       ) : (
         <div className="flex gap-4">
           <Button
+            onClick={() =>
+              signinRedirect({
+                extraQueryParams: {
+                  kc_action: "register",
+                },
+              })
+            }
+            className="cursor-pointer"
+            variant="outline"
+          >
+            Sign up
+          </Button>
+          <Button
             onClick={() => signinRedirect()}
             className="cursor-pointer"
           >

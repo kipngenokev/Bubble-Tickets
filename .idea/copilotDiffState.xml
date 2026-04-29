@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/bubble-tickets/src/main/java/com/lesha/bubble_tickets/config/SpaRoutingConfig.java">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/bubble-tickets/src/main/java/com/lesha/bubble_tickets/config/SpaRoutingConfig.java" />
+              <option name="originalContent" value="package com.lesha.bubble_tickets.config;&#10;&#10;import org.springframework.context.annotation.Configuration;&#10;import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;&#10;import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;&#10;&#10;@Configuration&#10;public class SpaRoutingConfig implements WebMvcConfigurer {&#10;&#10;    @Override&#10;    public void addViewControllers(ViewControllerRegistry registry) {&#10;        registry.addViewController(&quot;/{path:[^\\.]*}&quot;).setViewName(&quot;forward:/index.html&quot;);&#10;        registry.addViewController(&quot;/**/{path:[^\\.]*}&quot;).setViewName(&quot;forward:/index.html&quot;);&#10;    }&#10;}&#10;" />
+              <option name="updatedContent" value="package com.lesha.bubble_tickets.config;&#10;&#10;import org.springframework.context.annotation.Configuration;&#10;import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;&#10;import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;&#10;&#10;@Configuration&#10;public class SpaRoutingConfig implements WebMvcConfigurer {&#10;&#10;    @Override&#10;    public void addViewControllers(ViewControllerRegistry registry) {&#10;        registry.addViewController(&quot;/{path:[^\\.]*}&quot;).setViewName(&quot;forward:/index.html&quot;);&#10;        registry.addViewController(&quot;/{path:^(?!api$|assets$|actuator$|swagger-ui$|v3$)[^\\.]+}/**&quot;)&#10;                .setViewName(&quot;forward:/index.html&quot;);&#10;    }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

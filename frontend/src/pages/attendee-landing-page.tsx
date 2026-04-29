@@ -41,14 +41,16 @@ const AttendeeLandingPage: React.FC = () => {
     return () => {
       ignore = true;
     };
-  }, [page]);
+  }, [page, query]);
 
   const queryPublishedEvents = async () => {
+    const nextPage = 0;
+    setPage(nextPage);
     try {
       const data =
         query && query.length > 0
-          ? await searchPublishedEvents(query, page)
-          : await listPublishedEvents(page);
+          ? await searchPublishedEvents(query, nextPage)
+          : await listPublishedEvents(nextPage);
       setPublishedEvents(data);
     } catch (err) {
       setError(getErrorMessage(err));

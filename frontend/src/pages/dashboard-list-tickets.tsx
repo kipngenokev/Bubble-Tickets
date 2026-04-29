@@ -11,6 +11,7 @@ import { AlertCircle, DollarSign, Tag, Ticket } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "react-oidc-context";
 import { Link } from "react-router";
+import { Button } from "@/components/ui/button";
 
 const DashboardListTickets: React.FC = () => {
   const { isLoading, user } = useAuth();
@@ -75,6 +76,13 @@ const DashboardListTickets: React.FC = () => {
             icon={<Ticket className="h-10 w-10" />}
             title="No tickets yet"
             description="Tickets you purchase will appear here."
+            action={
+              <Link to="/">
+                <Button className="bg-purple-700 hover:bg-purple-500 cursor-pointer">
+                  Browse events
+                </Button>
+              </Link>
+            }
           />
         ) : (
           tickets.content.map((ticketItem) => (
