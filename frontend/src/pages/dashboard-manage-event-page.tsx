@@ -48,18 +48,16 @@ import {
   Trash,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { useAuth } from "react-oidc-context";
 import { useNavigate, useParams } from "react-router";
 import { z } from "zod";
 
 const ticketTypeSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  price: z.coerce
-    .number({ invalid_type_error: "Price must be a number" })
-    .min(0, "Price cannot be negative"),
+  price: z.coerce.number().min(0, "Price cannot be negative"),
   totalAvailable: z.coerce
-    .number({ invalid_type_error: "Must be a number" })
+    .number()
     .int("Must be a whole number")
     .min(0, "Cannot be negative"),
   description: z.string(),
@@ -203,7 +201,7 @@ const DashboardManageEventPage: React.FC = () => {
     reset: resetTicketForm,
     formState: { errors: ticketErrors },
   } = useForm<TicketTypeFormValues>({
-    resolver: zodResolver(ticketTypeSchema),
+    resolver: zodResolver(ticketTypeSchema) as Resolver<TicketTypeFormValues>,
     defaultValues: { name: "", price: 0, totalAvailable: 0, description: "" },
   });
 
@@ -297,7 +295,7 @@ const DashboardManageEventPage: React.FC = () => {
 
     const nameResult = eventNameSchema.safeParse(eventData.name);
     if (!nameResult.success) {
-      errors.name = nameResult.error.errors[0].message;
+      errors.name = nameResult.error.issues[0].message;
     }
 
     if (
